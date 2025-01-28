@@ -20,6 +20,6 @@ public interface IMobileContactService {
     List<MobileContact>getAllContacts();
 
     MobileContact getContactByPhoneNumber(String phoneNumber) throws ContactNotFoundException;
-    MobileContact deleteContactByPhoneNumber(String phoneNumber) throws ContactNotFoundException;
+    void deleteContactByPhoneNumber(String phoneNumber) throws ContactNotFoundException;
 
 }

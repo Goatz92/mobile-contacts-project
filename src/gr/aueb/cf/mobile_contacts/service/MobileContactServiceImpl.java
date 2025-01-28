@@ -9,7 +9,7 @@ import gr.aueb.cf.mobile_contacts.model.MobileContact;
 
 import java.util.List;
 
-public class MobileContactServiceImpl implements IMobileContactService{
+public class MobileContactServiceImpl implements IMobileContactService {
 
     private final IMobileContactDAO dao;
 
@@ -22,7 +22,7 @@ public class MobileContactServiceImpl implements IMobileContactService{
             throws PhoneNumberAlreadyExistsException {
         MobileContact mobileContact;
         try {
-            if(dao.phoneNumberExists(dto.getPhoneNumber())) {
+            if (dao.phoneNumberExists(dto.getPhoneNumber())) {
                 throw new PhoneNumberAlreadyExistsException("Contact with phone number: " +
                         dto.getPhoneNumber() + "already exists!");
             }
@@ -62,7 +62,7 @@ public class MobileContactServiceImpl implements IMobileContactService{
     @Override
     public void deleteContactById(Long id) throws ContactNotFoundException {
         try {
-            if (!dao.userIdExists(id)){
+            if (!dao.userIdExists(id)) {
                 throw new ContactNotFoundException("Contact with ID: " + id + ", Not found");
             }
             System.err.printf("MobileContactServiceImpl Logger: Contact with ID %s was deleted.", id);
@@ -90,18 +90,39 @@ public class MobileContactServiceImpl implements IMobileContactService{
 
     @Override
     public List<MobileContact> getAllContacts() {
-        return List.of();
+        return dao.getAll();
     }
 
     @Override
     public MobileContact getContactByPhoneNumber(String phoneNumber) throws ContactNotFoundException {
-        return null;
+        MobileContact mobileContact;
+        try {
+            mobileContact = dao.getByPhoneNumber(phoneNumber);
+            if (mobileContact == null) {
+                throw new ContactNotFoundException("Contact with phone number: " + phoneNumber + ", does not exist");
+            }
+            return mobileContact;
+        } catch (ContactNotFoundException e) {
+            System.err.println("Contact with phone number: " + phoneNumber + ", was not found to get returned");
+            throw e;
+        }
     }
 
     @Override
-    public MobileContact deleteContactByPhoneNumber(String phoneNumber) throws ContactNotFoundException {
-        return null;
+    public void deleteContactByPhoneNumber(String phoneNumber) throws ContactNotFoundException {
+        try {
+            if (!dao.phoneNumberExists(phoneNumber)) {
+                throw new ContactNotFoundException("Contact with phone number: " + phoneNumber + " not found for delete.");
+            }
+
+            System.err.printf("MobileContactServiceImpl Logger: contact with phone number: %s was deleted.\n", phoneNumber);
+            dao.deleteByPhoneNumber(phoneNumber);
+        } catch (ContactNotFoundException e) {
+            System.err.printf("MobileContactServiceImpl Logger: %s\n", e.getMessage());
+            throw e;
+        }
     }
+
 
     private MobileContact mapInsertDtoToContact(MobileContactInsertDTO dto) {
         return new MobileContact(null, dto.getFirstname(), dto.getLastname(), dto.getPhoneNumber());
